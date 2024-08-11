@@ -18,7 +18,11 @@ class DuolingoLitePlus:
         self.skills = {
             "Russian Alphabet": {
                 "questions": [
-                    # Alphabet questions will be handled in the show_alphabet_lesson method
+                    {"type": "multiple_choice", "question": "What is the Russian letter for 'A'?", "options": ["А", "Б", "В", "Г"], "answer": "А"},
+                    {"type": "multiple_choice", "question": "What is the Russian letter for 'B'?", "options": ["А", "Б", "В", "Г"], "answer": "Б"},
+                    {"type": "multiple_choice", "question": "What is the Russian letter for 'V'?", "options": ["А", "Б", "В", "Г"], "answer": "В"},
+                    {"type": "multiple_choice", "question": "What is the Russian letter for 'G'?", "options": ["А", "Б", "В", "Г"], "answer": "Г"},
+                    {"type": "typing", "question": "Type the letter 'Д'", "answer": "Д"}
                 ],
                 "completed": self.user_profile.get("completed_lessons", {}).get("Russian Alphabet", False),
             },
@@ -110,7 +114,7 @@ class DuolingoLitePlus:
         if not self.skills[self.current_skill]["completed"]:
             if self.current_phase == "multiple_choice":
                 self.show_vocabulary_question()
-            else:
+            elif self.current_phase == "typing":
                 self.show_typing_questions()
         else:
             messagebox.showinfo("Lesson Complete", f"You've already completed the {self.current_skill} lesson.")
