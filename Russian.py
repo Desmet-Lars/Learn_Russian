@@ -4,6 +4,7 @@ from tkinter import messagebox
 import json
 import os
 import random
+import time  # For tracking response time
 
 class DuolingoLitePlus:
     def __init__(self, root):
@@ -49,6 +50,8 @@ class DuolingoLitePlus:
         self.streak = self.user_profile.get("streak", 0)
         self.incorrect_answers = []
         self.current_phase = "multiple_choice"  # Phase can be "multiple_choice" or "typing"
+        self.last_answer_time = None  # To track the time taken to answer
+        self.correct_answer_streak = 0  # To track consecutive correct answers
 
         self.create_main_menu()
 
@@ -60,9 +63,10 @@ class DuolingoLitePlus:
                     profile["completed_lessons"] = {}
                 return profile
         else:
-            return {"xp": 0, "streak": 0, "completed_lessons": {}}
+            return {"xp": 0, "streak": 0, "completed_lessons": {}, "correct_answer_streak": 0}
 
     def save_profile(self):
+        self.user_profile["correct_answer_streak"] = self.correct_answer_streak
         with open("user_profile.json", "w") as file:
             json.dump(self.user_profile, file, indent=4)
 
@@ -83,7 +87,7 @@ class DuolingoLitePlus:
         exit_btn = ctk.CTkButton(self.root, text="Exit", font=ctk.CTkFont(size=14), command=self.root.quit)
         exit_btn.pack(pady=20)
 
-        stats_label = ctk.CTkLabel(self.root, text=f"XP: {self.xp} | Streak: {self.streak} days", font=ctk.CTkFont(size=14))
+        stats_label = ctk.CTkLabel(self.root, text=f"XP: {self.xp} | Streak: {self.streak} days | Correct Answer Streak: {self.correct_answer_streak}", font=ctk.CTkFont(size=14))
         stats_label.pack(pady=10)
 
     def is_skill_unlocked(self, skill):
@@ -118,6 +122,9 @@ class DuolingoLitePlus:
         if self.current_question_index < len(self.skills[self.current_skill]["questions"]):
             question = self.skills[self.current_skill]["questions"][self.current_question_index]
             question_type = question["type"]
+
+            # Record the time when the question is shown
+            self.last_answer_time = time.time()
 
             if question_type == "multiple_choice":
                 self.show_multiple_choice_question(question)
@@ -199,8 +206,11 @@ class DuolingoLitePlus:
     def check_vocabulary_answer(self, selected, correct):
         if selected.strip() == correct.strip():
             self.xp += 10
-            messagebox.showinfo("Correct!", "Great job! +10 XP")
+            self.correct_answer_streak += 1
+            time_taken = time.time() - self.last_answer_time
+            messagebox.showinfo("Correct!", f"Great job! +10 XP\nTime Taken: {int(time_taken)} seconds")
         else:
+            self.correct_answer_streak = 0
             messagebox.showerror("Incorrect", f"The correct answer was: {correct}")
 
         self.current_question_index += 1
@@ -214,8 +224,11 @@ class DuolingoLitePlus:
     def check_translation_answer(self, entered, correct):
         if entered.strip() == correct.strip():
             self.xp += 10
-            messagebox.showinfo("Correct!", "Great job! +10 XP")
+            self.correct_answer_streak += 1
+            time_taken = time.time() - self.last_answer_time
+            messagebox.showinfo("Correct!", f"Great job! +10 XP\nTime Taken: {int(time_taken)} seconds")
         else:
+            self.correct_answer_streak = 0
             messagebox.showerror("Incorrect", f"The correct answer was: {correct}")
 
         self.current_question_index += 1
@@ -227,8 +240,11 @@ class DuolingoLitePlus:
     def check_typing_answer(self, entered, correct):
         if entered.strip() == correct.strip():
             self.xp += 10
-            messagebox.showinfo("Correct!", "Great job! +10 XP")
+            self.correct_answer_streak += 1
+            time_taken = time.time() - self.last_answer_time
+            messagebox.showinfo("Correct!", f"Great job! +10 XP\nTime Taken: {int(time_taken)} seconds")
         else:
+            self.correct_answer_streak = 0
             messagebox.showerror("Incorrect", f"The correct answer was: {correct}")
 
         self.current_question_index += 1
@@ -245,6 +261,7 @@ class DuolingoLitePlus:
         self.user_profile["completed_lessons"][self.current_skill] = True
         self.user_profile["xp"] = self.xp
         self.user_profile["streak"] = self.streak
+        self.user_profile["correct_answer_streak"] = self.correct_answer_streak
         self.save_profile()
 
         messagebox.showinfo("Skill Complete", f"Congratulations! You completed the {self.current_skill} lesson.")
